@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ហាងលក់ម៉ូតូ សេងតារា — អ្នកគ្រប់គ្រង</title>
+<style>
+  :root{
+    --bg:#f3f4f6; --panel:#ffffff; --panel-2:#f5f6f8; --border:#e2e4e9;
+    --text:#1a1b1f; --muted:#6b7280; --red:#e0263f;
+    --green:#16a34a; --yellow:#d97706; --orange:#ea580c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter','Khmer OS','Noto Sans Khmer',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+  a{color:inherit;}
+  .wrap{max-width:1300px;margin:0 auto;padding:24px;}
+  header{display:flex;align-items:center;justify-content:space-between;background:var(--panel);border-bottom:1px solid var(--border);padding:16px 24px;flex-wrap:wrap;gap:10px;}
+  .logo{font-size:19px;font-weight:800;}
+  .logo span{color:var(--red);}
+  button{cursor:pointer;font-family:inherit;}
+  .btn{background:var(--red);color:#fff;border:none;padding:11px 18px;border-radius:6px;font-weight:700;font-size:13px;letter-spacing:.3px;}
+  .btn-outline{background:#fff;border:1px solid var(--border);color:#374151;padding:10px 16px;border-radius:6px;font-size:13px;}
+  .btn-danger{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:6px 11px;border-radius:6px;font-size:12px;}
+  .btn-view{background:#eff6ff;border:1px solid #bfdbfe;color:#2563eb;padding:6px 11px;border-radius:6px;font-size:12px;}
+  .btn-edit{background:var(--panel-2);border:1px solid var(--border);color:#374151;padding:6px 11px;border-radius:6px;font-size:12px;}
+
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(17,20,26,.45);z-index:200;
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  .modal-box{
+    background:#fff;border-radius:10px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;
+    box-shadow:0 12px 40px rgba(0,0,0,.18);
+  }
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border);}
+  .modal-header h3{font-size:16px;}
+  .modal-close{background:var(--panel-2);border:none;width:30px;height:30px;border-radius:50%;font-size:16px;color:#374151;}
+  .modal-body{padding:22px;}
+  .modal-photo{width:100%;max-height:200px;object-fit:contain;background:var(--panel-2);border-radius:8px;margin-bottom:18px;}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px;}
+  .detail-grid .full{grid-column:1/-1;}
+  .detail-item .dt-label{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px;}
+  .detail-item .dt-value{font-size:14px;font-weight:600;}
+  .modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+  .btn-small{padding:8px 14px;font-size:12.5px;}
+
+  .login-box{max-width:360px;margin:100px auto;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:32px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
+  .login-box h1{font-size:19px;margin-bottom:6px;}
+  .login-box p{color:var(--muted);font-size:13px;margin-bottom:22px;}
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+  .field input, .field select{
+    width:100%;background:#fff;border:1px solid var(--border);color:var(--text);
+    padding:10px 12px;border-radius:6px;font-size:14px;
+  }
+  .field input:focus, .field select:focus{outline:none;border-color:var(--red);}
+  .error-msg{color:#dc2626;font-size:13px;margin-top:10px;min-height:16px;}
+  .hidden{display:none !important;}
+
+  .tabs{display:flex;gap:6px;padding:16px 24px 0;flex-wrap:wrap;background:var(--panel);border-bottom:1px solid var(--border);}
+  .tab-btn{background:none;border:none;color:var(--muted);padding:12px 16px;font-size:13.5px;font-weight:700;border-bottom:2px solid transparent;}
+  .tab-btn.active{color:var(--text);border-bottom-color:var(--red);}
+
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:22px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .card h2{font-size:15px;margin-bottom:16px;letter-spacing:.3px;}
+  .form-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .form-grid .full{grid-column:1/-1;}
+  .form-grid .span2{grid-column:span 2;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{text-align:left;color:var(--muted);font-size:11px;letter-spacing:.4px;padding:9px 7px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:9px 7px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap;}
+  .table-scroll{overflow-x:auto;}
+  td.actions{display:flex;gap:6px;}
+  .thumb{width:44px;height:32px;object-fit:contain;background:var(--panel-2);border-radius:4px;border:1px solid var(--border);}
+  .pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:10px;display:inline-block;white-space:nowrap;}
+  .pill-green{background:#dcfce7;color:#16a34a;}
+  .pill-orange{background:#ffedd5;color:#ea580c;}
+  .pill-gray{background:var(--panel-2);color:var(--muted);border:1px solid var(--border);}
+  .pill-yellow{background:#fef3c7;color:#b45309;}
+  .pill-red{background:#fee2e2;color:#dc2626;}
+  .status-msg{font-size:13px;margin-top:10px;min-height:16px;}
+  .status-msg.ok{color:#16a34a;}
+  .status-msg.err{color:#dc2626;}
+  .toolbar-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;}
+  .filters select{background:#fff;border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-size:13px;}
+  input[type=file]{color:var(--muted);font-size:12.5px;}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+  .kpi-box{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .kpi-label{color:var(--muted);font-size:12px;margin-bottom:8px;line-height:1.4;}
+  .kpi-value{font-size:26px;font-weight:800;}
+  .kpi-value.neg{color:#dc2626;}
+  .kpi-value.warn{color:#b45309;}
+
+  @media(max-width:900px){
+    .form-grid{grid-template-columns:1fr 1fr;}
+    .kpi-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="login-box">
+  <h1>សេងតារា<span style="color:#e0263f">ហាងលក់ម៉ូតូ</span> — អ្នកគ្រប់គ្រង</h1>
+  <p>ចូលគណនីដើម្បីគ្រប់គ្រងអាជីវកម្មរបស់អ្នក។</p>
+  <div class="field"><label>អ៊ីមែល</label><input id="loginEmail" type="email" placeholder="you@sengtaramoto.com"></div>
+  <div class="field"><label>ពាក្យសម្ងាត់</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+  <button class="btn" id="loginBtn" style="width:100%;">ចូលគណនី</button>
+  <div class="error-msg" id="loginError"></div>
+</div>
+
+<!-- DASHBOARD SHELL -->
+<div id="dashboard" class="hidden">
+  <header>
+    <div class="logo">សេងតារា<span>ហាងលក់ម៉ូតូ</span> — អ្នកគ្រប់គ្រង</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <a href="index.html" class="btn-outline" style="text-decoration:none;">មើលគេហទំព័រ ↗</a>
+      <button class="btn-outline" id="logoutBtn">ចាកចេញ</button>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="tab-dashboard">ផ្ទាំងគ្រប់គ្រង</button>
+    <button class="tab-btn" data-tab="tab-register">បញ្ជីម៉ូតូ</button>
+    <button class="tab-btn" data-tab="tab-expenses">ចំណាយប្រចាំខែ</button>
+    <button class="tab-btn" data-tab="tab-profit">របាយការណ៍ចំណេញ</button>
+  </div>
+
+  <div class="wrap">
+
+    <!-- ===== TAB: DASHBOARD ===== -->
+    <div id="tab-dashboard" class="tab-panel">
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="card" style="margin-top:22px;">
+        <h2>ម៉ូតូត្រូវការការយកចិត្តទុកដាក់លើឯកសារ</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>ម៉ូដែល</th><th>លេខស្លាកលេខ</th><th>ស្ថានភាពឯកសារ</th><th>ម្ចាស់មុន</th></tr></thead>
+            <tbody id="docsAlertBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: VEHICLE REGISTER ===== -->
+    <div id="tab-register" class="tab-panel hidden">
+      <div class="card">
+        <h2 id="formTitle">បន្ថែមម៉ូតូថ្មី</h2>
+        <form id="bikeForm">
+          <input type="hidden" id="editId">
+          <div class="form-grid">
+            <div class="field"><label>ម៉ាក</label><input id="f_brand" required placeholder="Honda"></div>
+            <div class="field span2"><label>ឈ្មោះម៉ូដែល</label><input id="f_name" required placeholder="Honda Dream 125i"></div>
+            <div class="field"><label>ពណ៌</label><input id="f_color" placeholder="ក្រហម"></div>
+
+            <div class="field"><label>ម៉ាស៊ីន (ស៊ីស៊ី)</label><input id="f_cc" type="number" required placeholder="125"></div>
+            <div class="field"><label>ឆ្នាំ</label><input id="f_year" type="number" required placeholder="2024"></div>
+            <div class="field">
+              <label>ប្រអប់លេខ</label>
+              <select id="f_trans"><option value="Manual">ដៃ</option><option value="Automatic">ស្វ័យប្រវត្តិ</option></select>
+            </div>
+            <div class="field">
+              <label>ប្រភេទប្រេង</label>
+              <select id="f_fuel"><option value="Petrol">សាំង</option><option value="Electric">អគ្គិសនី</option></select>
+            </div>
+
+            <div class="field">
+              <label>លក្ខខណ្ឌ</label>
+              <select id="f_category"><option value="new">ថ្មី</option><option value="used">ប្រើប្រាស់ហើយ</option></select>
+            </div>
+            <div class="field">
+              <label>ស្ថានភាព</label>
+              <select id="f_status"><option value="In Stock">នៅស្តុក</option><option value="Reserved">បានកក់</option><option value="Sold">បានលក់</option></select>
+            </div>
+            <div class="field">
+              <label>ស្លាកសញ្ញា</label>
+              <select id="f_badge"><option value="">គ្មាន</option><option value="NEW">ថ្មី</option></select>
+            </div>
+            <div class="field full"><label>រូបភាព (ស្រេចចិត្ត)</label><input id="f_image" type="file" accept="image/*"></div>
+
+            <div class="field"><label>លេខម៉ាស៊ីន (Engine No.)</label><input id="f_engine" placeholder="JC52E-118820"></div>
+            <div class="field"><label>លេខគ្រោង (Chassis No.)</label><input id="f_chassis" placeholder="MLHJC52E1P8118820"></div>
+            <div class="field"><label>លេខស្លាកលេខ</label><input id="f_plate" placeholder="2AA-1023"></div>
+            <div class="field"><label>ថ្ងៃទិញចូល</label><input id="f_bought" type="date"></div>
+
+            <div class="field"><label>ថ្លៃទិញ ($)</label><input id="f_pcost" type="number" step="1" placeholder="1550"></div>
+            <div class="field"><label>ថ្លៃជួសជុល ($)</label><input id="f_rcost" type="number" step="1" placeholder="0"></div>
+            <div class="field span2">
+              <label>ស្ថានភាពឯកសារ</label>
+              <select id="f_docs">
+                <option value="Complete">ពេញលេញ</option>
+                <option value="Pending Transfer">កំពុងផ្ទេរ</option>
+                <option value="Missing Documents">ខ្វះឯកសារ</option>
+              </select>
+            </div>
+
+            <div class="field span2"><label>ម្ចាស់មុន (បើប្រើប្រាស់ហើយ)</label><input id="f_prevowner" placeholder="Sok Dara"></div>
+            <div class="field"><label>តម្លៃលក់ ($)</label><input id="f_price" type="number" step="1" required placeholder="1850"></div>
+            <div class="field"><label>ថ្ងៃលក់ចេញ</label><input id="f_solddate" type="date"></div>
+            <div class="field"><label>តម្លៃលក់ពិត ($)</label><input id="f_saleprice" type="number" step="1" placeholder="1850"></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button type="submit" class="btn" id="submitBtn">បន្ថែមម៉ូតូ</button>
+            <button type="button" class="btn-outline hidden" id="cancelEditBtn">បោះបង់ការកែសម្រួល</button>
+          </div>
+          <div class="status-msg" id="formStatus"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="toolbar-top">
+          <h2 style="margin:0;">បញ្ជីម៉ូតូទាំងអស់ (<span id="invCount">0</span>)</h2>
+          <div class="filters">
+            <select id="filterStatus">
+              <option value="all">ស្ថានភាព៖ ទាំងអស់</option>
+              <option value="In Stock">នៅស្តុក</option>
+              <option value="Reserved">បានកក់</option>
+              <option value="Sold">បានលក់</option>
+            </select>
+            <select id="filterCondition">
+              <option value="all">លក្ខខណ្ឌ៖ ទាំងអស់</option>
+              <option value="new">ថ្មី</option>
+              <option value="used">ប្រើប្រាស់ហើយ</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>រូបភាព</th><th>ស្ថានភាព</th><th>ម៉ូដែល</th><th>លេខម៉ាស៊ីន</th><th>លេខស្លាកលេខ</th>
+              <th>ឯកសារ</th><th>ថ្លៃដើម</th><th>តម្លៃលក់</th><th>ថ្ងៃទិញចូល</th><th>ចំណេញ</th><th>សកម្មភាព</th>
+            </tr></thead>
+            <tbody id="invTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: MONTHLY EXPENSES ===== -->
+    <div id="tab-expenses" class="tab-panel hidden">
+      <div class="card">
+        <h2 id="expFormTitle">បន្ថែមចំណាយប្រចាំខែ</h2>
+        <form id="expenseForm">
+          <input type="hidden" id="expEditId">
+          <div class="form-grid">
+            <div class="field"><label>ខែ</label><input id="e_month" type="month" required></div>
+            <div class="field"><label>ថ្លៃឈ្នួល ($)</label><input id="e_rent" type="number" step="1" placeholder="350"></div>
+            <div class="field"><label>ប្រាក់ខែបុគ្គលិក ($)</label><input id="e_staff" type="number" step="1" placeholder="900"></div>
+            <div class="field"><label>ទឹក/ភ្លើង ($)</label><input id="e_utilities" type="number" step="1" placeholder="120"></div>
+            <div class="field"><label>ទីផ្សារ ($)</label><input id="e_marketing" type="number" step="1" placeholder="150"></div>
+            <div class="field"><label>ផ្សេងៗ ($)</label><input id="e_other" type="number" step="1" placeholder="60"></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button type="submit" class="btn" id="expSubmitBtn">រក្សាទុកចំណាយ</button>
+            <button type="button" class="btn-outline hidden" id="expCancelBtn">បោះបង់ការកែសម្រួល</button>
+          </div>
+          <div class="status-msg" id="expFormStatus"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>ចំណាយប្រចាំខែទាំងអស់</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>ខែ</th><th>ថ្លៃឈ្នួល</th><th>ប្រាក់ខែ</th><th>ទឹក/ភ្លើង</th><th>ទីផ្សារ</th><th>ផ្សេងៗ</th><th>សរុប</th><th>សកម្មភាព</th></tr></thead>
+            <tbody id="expTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: PROFIT SUMMARY ===== -->
+    <div id="tab-profit" class="tab-panel hidden">
+      <div class="card">
+        <h2>របាយការណ៍ប្រាក់ចំណេញប្រចាំខែ</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr>
+              <th>ខែ</th><th>ចំណូល</th><th>ថ្លៃដើមទំនិញ</th><th>ចំណេញដុល</th><th>អត្រា%</th>
+              <th>ចំណាយប្រតិបត្តិការ</th><th>ចំណេញសុទ្ធ</th><th>អត្រា%</th><th>ចំនួនលក់</th>
+            </tr></thead>
+            <tbody id="profitTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- VIEW DETAILS MODAL -->
+<div id="viewModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="viewModalTitle">ព័ត៌មានលម្អិត</h3>
+      <button class="modal-close" id="viewModalClose">✕</button>
+    </div>
+    <div class="modal-body" id="viewModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-edit" id="viewModalEditBtn">កែសម្រួល</button>
+      <button class="btn-outline" id="viewModalCloseBtn">បិទ</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script>
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const loginError = document.getElementById('loginError');
+
+let allVehicles = [];
+let allExpenses = [];
+
+/* ---- AUTH ---- */
+async function checkSession(){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session){ showDashboard(); } else { showLogin(); }
+}
+function showLogin(){ loginScreen.classList.remove('hidden'); dashboard.classList.add('hidden'); }
+function showDashboard(){ loginScreen.classList.add('hidden'); dashboard.classList.remove('hidden'); loadAll(); }
+
+document.getElementById('loginBtn').addEventListener('click', async ()=>{
+  loginError.textContent='';
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if(error){ loginError.textContent = error.message; return; }
+  showDashboard();
+});
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+  await sb.auth.signOut();
+  showLogin();
+});
+
+/* ---- TABS ---- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.tab).classList.remove('hidden');
+  });
+});
+
+/* ---- HELPERS ---- */
+const money = n => '$' + Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0});
+const pct = n => (Number(n||0)*100).toFixed(1) + '%';
+function monthKey(dateStr){
+  if(!dateStr) return null;
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+function monthLabel(key){
+  const d = new Date(key);
+  return d.toLocaleDateString('en-US',{month:'short', year:'numeric'});
+}
+function daysBetween(a,b){
+  const d1=new Date(a), d2=b?new Date(b):new Date();
+  return Math.max(0, Math.round((d2-d1)/86400000));
+}
+
+/* ---- LOAD ALL DATA ---- */
+async function loadAll(){
+  const [{data:vehicles, error:vErr}, {data:expenses, error:eErr}] = await Promise.all([
+    sb.from('motorcycles').select('*').order('id',{ascending:false}),
+    sb.from('monthly_expenses').select('*').order('month',{ascending:false})
+  ]);
+  if(vErr) console.error(vErr);
+  if(eErr) console.error(eErr);
+  allVehicles = vehicles || [];
+  allExpenses = expenses || [];
+  renderDashboard();
+  renderRegisterTable();
+  renderExpensesTable();
+  renderProfitSummary();
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(){
+  const inStock = allVehicles.filter(v=>v.status==='In Stock');
+  const reserved = allVehicles.filter(v=>v.status==='Reserved');
+  const sold = allVehicles.filter(v=>v.status==='Sold');
+  const cashTiedUp = inStock.reduce((s,v)=>s+Number(v.purchase_cost||0)+Number(v.repair_cost||0),0);
+  const potentialRevenue = inStock.reduce((s,v)=>s+Number(v.price||0),0);
+  const totalProfit = sold.reduce((s,v)=>s+ (Number(v.actual_sale_price||0) - Number(v.purchase_cost||0) - Number(v.repair_cost||0)) ,0);
+  const avgDays = inStock.length ? Math.round(inStock.reduce((s,v)=>s+daysBetween(v.date_bought_in),0)/inStock.length) : 0;
+  const missingDocs = allVehicles.filter(v=>v.owner_documents==='Missing Documents').length;
+  const pendingDocs = allVehicles.filter(v=>v.owner_documents==='Pending Transfer').length;
+
+  const kpis = [
+    ['ចំនួននៅស្តុក', inStock.length, ''],
+    ['ចំនួនបានកក់', reserved.length, ''],
+    ['ចំនួនបានលក់សរុប', sold.length, ''],
+    ['ដើមទុនជាប់ក្នុងស្តុក', money(cashTiedUp), ''],
+    ['ចំណូលដែលអាចរកបាន', money(potentialRevenue), ''],
+    ['ប្រាក់ចំណេញសរុប', money(totalProfit), totalProfit<0?'neg':''],
+    ['ថ្ងៃមធ្យមនៅស្តុក', avgDays + ' ថ្ងៃ', ''],
+    ['ខ្វះ/កំពុងផ្ទេរឯកសារ', missingDocs+pendingDocs, (missingDocs+pendingDocs)>0?'warn':''],
+  ];
+  document.getElementById('kpiGrid').innerHTML = kpis.map(([label,val,cls])=>`
+    <div class="kpi-box">
+      <div class="kpi-label">${label}</div>
+      <div class="kpi-value ${cls}">${val}</div>
+    </div>`).join('');
+
+  const flagged = allVehicles.filter(v=>v.owner_documents && v.owner_documents!=='Complete');
+  document.getElementById('docsAlertBody').innerHTML = flagged.length ? flagged.map(v=>`
+    <tr>
+      <td>${v.name}</td>
+      <td>${v.plate_number||'—'}</td>
+      <td>${docsPill(v.owner_documents)}</td>
+      <td>${v.previous_owner||'—'}</td>
+    </tr>`).join('') : `<tr><td colspan="4">គ្មានឯកសារត្រូវការការយកចិត្តទុកដាក់ទេ។</td></tr>`;
+}
+
+function docsPill(status){
+  if(status==='Complete') return `<span class="pill pill-green">ពេញលេញ</span>`;
+  if(status==='Pending Transfer') return `<span class="pill pill-yellow">កំពុងផ្ទេរ</span>`;
+  if(status==='Missing Documents') return `<span class="pill pill-red">ខ្វះឯកសារ</span>`;
+  return status||'—';
+}
+function statusPill(status){
+  if(status==='In Stock') return `<span class="pill pill-green">នៅស្តុក</span>`;
+  if(status==='Reserved') return `<span class="pill pill-orange">បានកក់</span>`;
+  if(status==='Sold') return `<span class="pill pill-gray">បានលក់</span>`;
+  return status||'—';
+}
+
+/* ================= VEHICLE REGISTER ================= */
+function getFilteredVehicles(){
+  const st = document.getElementById('filterStatus').value;
+  const cond = document.getElementById('filterCondition').value;
+  return allVehicles.filter(v=>{
+    if(st!=='all' && v.status!==st) return false;
+    if(cond!=='all' && v.category!==cond) return false;
+    return true;
+  });
+}
+document.getElementById('filterStatus').addEventListener('change', renderRegisterTable);
+document.getElementById('filterCondition').addEventListener('change', renderRegisterTable);
+
+function renderRegisterTable(){
+  const list = getFilteredVehicles();
+  document.getElementById('invCount').textContent = list.length;
+  document.getElementById('invTableBody').innerHTML = list.length ? list.map(v=>{
+    const totalCost = Number(v.purchase_cost||0)+Number(v.repair_cost||0);
+    const profit = v.status==='Sold' ? (Number(v.actual_sale_price||0)-totalCost) : null;
+    return `
+    <tr data-id="${v.id}">
+      <td>${v.image_url?`<img class="thumb" src="${v.image_url}">`:'—'}</td>
+      <td>${statusPill(v.status)}</td>
+      <td>${v.name}<br><span style="color:var(--muted);font-size:11px;">${v.brand} · ${v.year}</span></td>
+      <td>${v.engine_number||'—'}</td>
+      <td>${v.plate_number||'—'}</td>
+      <td>${docsPill(v.owner_documents)}</td>
+      <td>${money(totalCost)}</td>
+      <td>${money(v.price)}</td>
+      <td>${v.date_bought_in||'—'}</td>
+      <td>${profit===null ? '—' : money(profit)}</td>
+      <td class="actions">
+        <button class="btn-view" data-view="${v.id}">មើល</button>
+        <button class="btn-edit" data-edit="${v.id}">កែសម្រួល</button>
+        <button class="btn-danger" data-del="${v.id}">លុប</button>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="11">មិនទាន់មានម៉ូតូត្រូវនឹងតម្រងនេះទេ។</td></tr>`;
+}
+
+document.getElementById('invTableBody').addEventListener('click', async (e)=>{
+  const viewId = e.target.dataset.view;
+  const editId = e.target.dataset.edit;
+  const delId = e.target.dataset.del;
+  if(viewId) openViewModal(viewId);
+  if(editId) loadIntoForm(editId);
+  if(delId){
+    if(!confirm('លុបម៉ូតូនេះឬ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានទេ។')) return;
+    const { error } = await sb.from('motorcycles').delete().eq('id', delId);
+    if(error){ alert('ការលុបបរាជ័យ៖ '+error.message); return; }
+    await loadAll();
+  }
+});
+
+/* ---- VIEW DETAILS MODAL ---- */
+let viewModalCurrentId = null;
+function detailItem(label, value, full){
+  return `<div class="detail-item ${full?'full':''}">
+    <div class="dt-label">${label}</div>
+    <div class="dt-value">${(value===null||value===undefined||value==='') ? '—' : value}</div>
+  </div>`;
+}
+function openViewModal(id){
+  const v = allVehicles.find(x=>String(x.id)===String(id));
+  if(!v) return;
+  viewModalCurrentId = v.id;
+  const totalCost = Number(v.purchase_cost||0)+Number(v.repair_cost||0);
+  const profit = v.status==='Sold' ? (Number(v.actual_sale_price||0)-totalCost) : null;
+
+  document.getElementById('viewModalTitle').textContent = v.name;
+  document.getElementById('viewModalBody').innerHTML = `
+    ${v.image_url ? `<img class="modal-photo" src="${v.image_url}">` : ''}
+    <div class="detail-grid">
+      ${detailItem('ស្ថានភាព', statusPill(v.status))}
+      ${detailItem('លក្ខខណ្ឌ', v.category==='used'?'ប្រើប្រាស់ហើយ':'ថ្មី')}
+      ${detailItem('ម៉ាក', v.brand)}
+      ${detailItem('ម៉ូដែល', v.name)}
+      ${detailItem('ពណ៌', v.color)}
+      ${detailItem('ឆ្នាំ', v.year)}
+      ${detailItem('ម៉ាស៊ីន (ស៊ីស៊ី)', v.cc+'cc')}
+      ${detailItem('ប្រអប់លេខ', v.transmission==='Automatic'?'ស្វ័យប្រវត្តិ':'ដៃ')}
+      ${detailItem('លេខម៉ាស៊ីន', v.engine_number)}
+      ${detailItem('លេខគ្រោង', v.chassis_number)}
+      ${detailItem('លេខស្លាកលេខ', v.plate_number)}
+      ${detailItem('ស្ថានភាពឯកសារ', docsPill(v.owner_documents))}
+      ${detailItem('ម្ចាស់មុន', v.previous_owner)}
+      ${detailItem('ថ្ងៃទិញចូល', v.date_bought_in)}
+      ${detailItem('ថ្លៃទិញ', money(v.purchase_cost))}
+      ${detailItem('ថ្លៃជួសជុល', money(v.repair_cost))}
+      ${detailItem('ថ្លៃដើមសរុប', money(totalCost))}
+      ${detailItem('តម្លៃលក់', money(v.price))}
+      ${detailItem('ថ្ងៃលក់ចេញ', v.date_sold_out)}
+      ${detailItem('តម្លៃលក់ពិត', v.actual_sale_price!=null?money(v.actual_sale_price):null)}
+      ${detailItem('ប្រាក់ចំណេញ', profit!==null?money(profit):null)}
+    </div>
+  `;
+  document.getElementById('viewModal').classList.remove('hidden');
+}
+function closeViewModal(){
+  document.getElementById('viewModal').classList.add('hidden');
+  viewModalCurrentId = null;
+}
+document.getElementById('viewModalClose').addEventListener('click', closeViewModal);
+document.getElementById('viewModalCloseBtn').addEventListener('click', closeViewModal);
+document.getElementById('viewModal').addEventListener('click', (e)=>{
+  if(e.target.id==='viewModal') closeViewModal();
+});
+document.getElementById('viewModalEditBtn').addEventListener('click', ()=>{
+  const id = viewModalCurrentId;
+  closeViewModal();
+  if(id) loadIntoForm(id);
+});
+
+function loadIntoForm(id){
+  const v = allVehicles.find(x=>String(x.id)===String(id));
+  if(!v) return;
+  document.getElementById('editId').value = v.id;
+  document.getElementById('f_brand').value = v.brand||'';
+  document.getElementById('f_name').value = v.name||'';
+  document.getElementById('f_color').value = v.color||'';
+  document.getElementById('f_cc').value = v.cc||'';
+  document.getElementById('f_year').value = v.year||'';
+  document.getElementById('f_trans').value = v.transmission||'Manual';
+  document.getElementById('f_fuel').value = v.fuel||'Petrol';
+  document.getElementById('f_category').value = v.category||'new';
+  document.getElementById('f_status').value = v.status||'In Stock';
+  document.getElementById('f_badge').value = v.badge||'';
+  document.getElementById('f_engine').value = v.engine_number||'';
+  document.getElementById('f_chassis').value = v.chassis_number||'';
+  document.getElementById('f_plate').value = v.plate_number||'';
+  document.getElementById('f_bought').value = v.date_bought_in||'';
+  document.getElementById('f_pcost').value = v.purchase_cost||'';
+  document.getElementById('f_rcost').value = v.repair_cost||'';
+  document.getElementById('f_docs').value = v.owner_documents||'Complete';
+  document.getElementById('f_prevowner').value = v.previous_owner||'';
+  document.getElementById('f_price').value = v.price||'';
+  document.getElementById('f_solddate').value = v.date_sold_out||'';
+  document.getElementById('f_saleprice').value = v.actual_sale_price||'';
+  document.getElementById('formTitle').textContent = 'កែសម្រួលម៉ូតូ';
+  document.getElementById('submitBtn').textContent = 'រក្សាទុកការផ្លាស់ប្តូរ';
+  document.getElementById('cancelEditBtn').classList.remove('hidden');
+  document.querySelector('[data-tab="tab-register"]').click();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('cancelEditBtn').addEventListener('click', resetBikeForm);
+function resetBikeForm(){
+  document.getElementById('bikeForm').reset();
+  document.getElementById('editId').value='';
+  document.getElementById('formTitle').textContent = 'បន្ថែមម៉ូតូថ្មី';
+  document.getElementById('submitBtn').textContent = 'បន្ថែមម៉ូតូ';
+  document.getElementById('cancelEditBtn').classList.add('hidden');
+  document.getElementById('formStatus').textContent='';
+}
+
+document.getElementById('bikeForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('formStatus');
+  statusEl.className='status-msg'; statusEl.textContent='កំពុងរក្សាទុក...';
+
+  const id = document.getElementById('editId').value;
+  const payload = {
+    brand: document.getElementById('f_brand').value.trim(),
+    name: document.getElementById('f_name').value.trim(),
+    color: document.getElementById('f_color').value.trim() || null,
+    cc: parseInt(document.getElementById('f_cc').value,10),
+    year: parseInt(document.getElementById('f_year').value,10),
+    transmission: document.getElementById('f_trans').value,
+    fuel: document.getElementById('f_fuel').value,
+    category: document.getElementById('f_category').value,
+    status: document.getElementById('f_status').value,
+    badge: document.getElementById('f_badge').value || null,
+    engine_number: document.getElementById('f_engine').value.trim() || null,
+    chassis_number: document.getElementById('f_chassis').value.trim() || null,
+    plate_number: document.getElementById('f_plate').value.trim() || null,
+    date_bought_in: document.getElementById('f_bought').value || null,
+    purchase_cost: parseFloat(document.getElementById('f_pcost').value) || 0,
+    repair_cost: parseFloat(document.getElementById('f_rcost').value) || 0,
+    owner_documents: document.getElementById('f_docs').value,
+    previous_owner: document.getElementById('f_prevowner').value.trim() || null,
+    price: parseFloat(document.getElementById('f_price').value),
+    date_sold_out: document.getElementById('f_solddate').value || null,
+    actual_sale_price: document.getElementById('f_saleprice').value ? parseFloat(document.getElementById('f_saleprice').value) : null
+  };
+
+  const file = document.getElementById('f_image').files[0];
+  if(file){
+    const filePath = `${Date.now()}-${file.name.replace(/\s+/g,'-')}`;
+    const { error: uploadError } = await sb.storage.from('motorcycle-images').upload(filePath, file);
+    if(uploadError){ statusEl.className='status-msg err'; statusEl.textContent = 'ការផ្ទុករូបភាពបរាជ័យ៖ '+uploadError.message; return; }
+    const { data: pub } = sb.storage.from('motorcycle-images').getPublicUrl(filePath);
+    payload.image_url = pub.publicUrl;
+  }
+
+  let error;
+  if(id){
+    ({ error } = await sb.from('motorcycles').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('motorcycles').insert(payload));
+  }
+
+  if(error){ statusEl.className='status-msg err'; statusEl.textContent = 'ការរក្សាទុកបរាជ័យ៖ '+error.message; return; }
+  statusEl.className='status-msg ok'; statusEl.textContent = id ? 'ធ្វើបច្ចុប្បន្នភាពជោគជ័យ។' : 'បន្ថែមជោគជ័យ។';
+  resetBikeForm();
+  await loadAll();
+});
+
+/* ================= MONTHLY EXPENSES ================= */
+function renderExpensesTable(){
+  const sorted = [...allExpenses].sort((a,b)=> b.month.localeCompare(a.month));
+  document.getElementById('expTableBody').innerHTML = sorted.length ? sorted.map(x=>{
+    const total = Number(x.rent||0)+Number(x.staff_salaries||0)+Number(x.utilities||0)+Number(x.marketing||0)+Number(x.other||0);
+    return `
+    <tr data-id="${x.id}">
+      <td>${monthLabel(x.month)}</td>
+      <td>${money(x.rent)}</td>
+      <td>${money(x.staff_salaries)}</td>
+      <td>${money(x.utilities)}</td>
+      <td>${money(x.marketing)}</td>
+      <td>${money(x.other)}</td>
+      <td><b>${money(total)}</b></td>
+      <td class="actions">
+        <button class="btn-edit btn-small" data-expedit="${x.id}">កែសម្រួល</button>
+        <button class="btn-danger btn-small" data-expdel="${x.id}">លុប</button>
+      </td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="8">មិនទាន់មានទិន្នន័យចំណាយទេ។</td></tr>`;
+}
+
+document.getElementById('expTableBody').addEventListener('click', async (e)=>{
+  const editId = e.target.dataset.expedit;
+  const delId = e.target.dataset.expdel;
+  if(editId) loadExpenseIntoForm(editId);
+  if(delId){
+    if(!confirm('លុបទិន្នន័យចំណាយខែនេះឬ?')) return;
+    const { error } = await sb.from('monthly_expenses').delete().eq('id', delId);
+    if(error){ alert('ការលុបបរាជ័យ៖ '+error.message); return; }
+    await loadAll();
+  }
+});
+
+function loadExpenseIntoForm(id){
+  const x = allExpenses.find(e=>String(e.id)===String(id));
+  if(!x) return;
+  document.getElementById('expEditId').value = x.id;
+  document.getElementById('e_month').value = x.month.slice(0,7);
+  document.getElementById('e_rent').value = x.rent||0;
+  document.getElementById('e_staff').value = x.staff_salaries||0;
+  document.getElementById('e_utilities').value = x.utilities||0;
+  document.getElementById('e_marketing').value = x.marketing||0;
+  document.getElementById('e_other').value = x.other||0;
+  document.getElementById('expFormTitle').textContent = 'កែសម្រួលចំណាយប្រចាំខែ';
+  document.getElementById('expSubmitBtn').textContent = 'រក្សាទុកការផ្លាស់ប្តូរ';
+  document.getElementById('expCancelBtn').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('expCancelBtn').addEventListener('click', resetExpenseForm);
+function resetExpenseForm(){
+  document.getElementById('expenseForm').reset();
+  document.getElementById('expEditId').value='';
+  document.getElementById('expFormTitle').textContent = 'បន្ថែមចំណាយប្រចាំខែ';
+  document.getElementById('expSubmitBtn').textContent = 'រក្សាទុកចំណាយ';
+  document.getElementById('expCancelBtn').classList.add('hidden');
+  document.getElementById('expFormStatus').textContent='';
+}
+
+document.getElementById('expenseForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('expFormStatus');
+  statusEl.className='status-msg'; statusEl.textContent='កំពុងរក្សាទុក...';
+
+  const id = document.getElementById('expEditId').value;
+  const monthVal = document.getElementById('e_month').value; // "YYYY-MM"
+  const payload = {
+    month: monthVal + '-01',
+    rent: parseFloat(document.getElementById('e_rent').value) || 0,
+    staff_salaries: parseFloat(document.getElementById('e_staff').value) || 0,
+    utilities: parseFloat(document.getElementById('e_utilities').value) || 0,
+    marketing: parseFloat(document.getElementById('e_marketing').value) || 0,
+    other: parseFloat(document.getElementById('e_other').value) || 0
+  };
+
+  let error;
+  if(id){
+    ({ error } = await sb.from('monthly_expenses').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('monthly_expenses').upsert(payload, { onConflict: 'month' }));
+  }
+
+  if(error){ statusEl.className='status-msg err'; statusEl.textContent = 'ការរក្សាទុកបរាជ័យ៖ '+error.message; return; }
+  statusEl.className='status-msg ok'; statusEl.textContent = 'រក្សាទុកជោគជ័យ។';
+  resetExpenseForm();
+  await loadAll();
+});
+
+/* ================= PROFIT SUMMARY ================= */
+function renderProfitSummary(){
+  const soldByMonth = {};
+  allVehicles.filter(v=>v.status==='Sold' && v.date_sold_out).forEach(v=>{
+    const key = monthKey(v.date_sold_out);
+    if(!soldByMonth[key]) soldByMonth[key] = { revenue:0, cogs:0, units:0 };
+    soldByMonth[key].revenue += Number(v.actual_sale_price||0);
+    soldByMonth[key].cogs += Number(v.purchase_cost||0)+Number(v.repair_cost||0);
+    soldByMonth[key].units += 1;
+  });
+  const expByMonth = {};
+  allExpenses.forEach(x=>{
+    expByMonth[x.month] = Number(x.rent||0)+Number(x.staff_salaries||0)+Number(x.utilities||0)+Number(x.marketing||0)+Number(x.other||0);
+  });
+
+  const allKeys = Array.from(new Set([...Object.keys(soldByMonth), ...Object.keys(expByMonth)])).sort((a,b)=>b.localeCompare(a));
+
+  if(!allKeys.length){
+    document.getElementById('profitTableBody').innerHTML = `<tr><td colspan="9">មិនទាន់មានទិន្នន័យគ្រប់គ្រាន់ទេ។ សូមកត់ត្រាការលក់ និងចំណាយសិន។</td></tr>`;
+    return;
+  }
+
+  let totRev=0, totCogs=0, totGross=0, totOpex=0, totNet=0, totUnits=0;
+  const rows = allKeys.map(key=>{
+    const s = soldByMonth[key] || {revenue:0,cogs:0,units:0};
+    const opex = expByMonth[key] || 0;
+    const gross = s.revenue - s.cogs;
+    const net = gross - opex;
+    totRev+=s.revenue; totCogs+=s.cogs; totGross+=gross; totOpex+=opex; totNet+=net; totUnits+=s.units;
+    return `<tr>
+      <td>${monthLabel(key)}</td>
+      <td>${money(s.revenue)}</td>
+      <td>${money(s.cogs)}</td>
+      <td>${money(gross)}</td>
+      <td>${s.revenue? pct(gross/s.revenue) : '—'}</td>
+      <td>${money(opex)}</td>
+      <td>${money(net)}</td>
+      <td>${s.revenue? pct(net/s.revenue) : '—'}</td>
+      <td>${s.units}</td>
+    </tr>`;
+  }).join('');
+
+  const totalRow = `<tr style="font-weight:700;border-top:2px solid var(--border);">
+    <td>សរុប</td><td>${money(totRev)}</td><td>${money(totCogs)}</td><td>${money(totGross)}</td>
+    <td>${totRev?pct(totGross/totRev):'—'}</td><td>${money(totOpex)}</td><td>${money(totNet)}</td>
+    <td>${totRev?pct(totNet/totRev):'—'}</td><td>${totUnits}</td>
+  </tr>`;
+
+  document.getElementById('profitTableBody').innerHTML = rows + totalRow;
+}
+
+checkSession();
+</script>
+</body>
+</html>

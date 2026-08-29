@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ហាងលក់ម៉ូតូ សេងតារា — ស្វែងរកម៉ូតូដ៏សមស្រប</title>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --panel:#ffffff;
+    --panel-2:#f0f1f4;
+    --border:#e2e4e9;
+    --text:#1a1b1f;
+    --muted:#6b7280;
+    --red:#e0263f;
+    --red-dim:#e0263f1a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter','Khmer OS','Noto Sans Khmer',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    line-height:1.5;
+  }
+  a{color:inherit;text-decoration:none;}
+  ul{list-style:none;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select{font-family:inherit;}
+  img{max-width:100%;display:block;}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 32px;}
+
+  /* ===== HEADER ===== */
+  header.site{
+    position:sticky;top:0;z-index:100;
+    background:#ffffffee;backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .header-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 32px;max-width:1280px;margin:0 auto;
+  }
+  .logo{font-size:22px;font-weight:800;letter-spacing:0.5px;}
+  .logo span{display:block;font-size:10px;color:var(--red);font-weight:700;letter-spacing:3px;margin-top:-4px;}
+  nav.main-nav{display:flex;gap:30px;align-items:center;}
+  nav.main-nav a{font-size:14px;font-weight:600;color:#4b4f58;position:relative;padding-bottom:20px;}
+  nav.main-nav a.active{color:var(--text);}
+  nav.main-nav a.active::after{
+    content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:var(--red);
+  }
+  .header-right{display:flex;align-items:center;gap:16px;}
+  .icon-btn{
+    width:20px;height:20px;display:flex;align-items:center;justify-content:center;
+    color:#374151;background:none;border:none;
+  }
+  .lang-toggle{
+    display:flex;border:1px solid var(--border);border-radius:20px;overflow:hidden;font-size:12px;font-weight:700;
+  }
+  .lang-toggle button{background:var(--panel);color:var(--muted);border:none;padding:7px 12px;}
+  .lang-toggle button.active{background:var(--red);color:#fff;}
+  .btn-outline{
+    border:1px solid var(--red);color:var(--red);font-size:12px;font-weight:700;
+    letter-spacing:1px;padding:11px 20px;border-radius:2px;background:transparent;
+    transition:background .2s, color .2s;
+  }
+  .btn-outline:hover{background:var(--red);color:#fff;}
+
+  /* ===== BREADCRUMB + HERO ===== */
+  .hero-section{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
+  .breadcrumb{
+    max-width:1280px;margin:0 auto;padding:16px 32px 0;
+    font-size:13px;color:var(--muted);
+  }
+  .breadcrumb a{color:var(--muted);}
+  .breadcrumb span.sep{margin:0 8px;}
+  .breadcrumb span.current{color:var(--text);}
+  .hero{
+    position:relative;min-height:280px;display:flex;align-items:center;
+    background:
+      radial-gradient(ellipse at 75% 40%, rgba(224,38,63,.08), transparent 55%),
+      linear-gradient(100deg,#ffffff 30%, #fbf7f7 60%, #fdf2f2 100%);
+    overflow:hidden;
+  }
+  .hero-content{max-width:1280px;margin:0 auto;padding:40px 32px;width:100%;position:relative;z-index:2;}
+  .hero h1{font-size:50px;font-weight:900;letter-spacing:0.5px;line-height:1.15;}
+  .hero p{margin-top:14px;color:var(--muted);font-size:15px;max-width:440px;}
+  .hero-art{
+    position:absolute;right:-40px;top:0;bottom:0;width:60%;
+    display:flex;align-items:center;justify-content:center;opacity:.9;
+    z-index:1;
+  }
+  .speed-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .speed-lines i{
+    position:absolute;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red));
+    animation:zoom 2.4s linear infinite;
+  }
+  @keyframes zoom{
+    from{transform:translateX(0);opacity:0;}
+    10%{opacity:1;}
+    to{transform:translateX(-900px);opacity:0;}
+  }
+
+  /* ===== LAYOUT ===== */
+  .content{max-width:1280px;margin:0 auto;padding:32px;display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start;}
+
+  /* ===== SIDEBAR ===== */
+  .clear-filters{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px solid var(--border);padding:12px;font-size:13px;font-weight:700;
+    color:var(--red);letter-spacing:.5px;margin-bottom:18px;background:var(--panel);
+    border-radius:2px;
+  }
+  .filter-block{border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:20px;}
+  .filter-title{font-size:12px;font-weight:800;letter-spacing:1px;color:#374151;margin-bottom:14px;}
+  .radio-row,.check-row{
+    display:flex;align-items:center;gap:10px;font-size:13.5px;color:#374151;
+    padding:6px 0;cursor:pointer;
+  }
+  .radio-row span.count,.check-row span.count{margin-left:auto;color:var(--muted);font-size:12px;}
+  input[type=radio],input[type=checkbox]{
+    accent-color:var(--red);width:15px;height:15px;flex:none;cursor:pointer;
+  }
+  .brand-search{
+    display:flex;align-items:center;background:var(--panel);border:1px solid var(--border);
+    border-radius:2px;padding:8px 10px;margin-bottom:10px;
+  }
+  .brand-search input{background:none;border:none;color:var(--text);font-size:13px;flex:1;outline:none;}
+  .brand-search svg{width:14px;height:14px;color:var(--muted);}
+  .show-more{color:var(--red);font-size:12.5px;font-weight:700;margin-top:4px;cursor:pointer;}
+  .price-slider{padding:6px 4px 14px;}
+  .price-slider input[type=range]{width:100%;accent-color:var(--red);}
+  .price-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px;}
+  .price-chips{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+  .price-chips button{
+    background:var(--panel);border:1px solid var(--border);color:#4b4f58;
+    font-size:12px;padding:9px 6px;border-radius:2px;transition:.15s;
+  }
+  .price-chips button.active,.price-chips button:hover{border-color:var(--red);color:var(--red);}
+  select.filter-select{
+    width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);
+    padding:10px;font-size:13px;border-radius:2px;
+  }
+  .apply-btn{
+    width:100%;background:var(--red);color:#fff;border:none;padding:14px;
+    font-weight:800;font-size:13px;letter-spacing:.5px;border-radius:2px;margin-top:4px;
+  }
+
+  /* ===== MAIN LIST HEADER ===== */
+  .list-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px;}
+  .result-count{font-size:14px;color:var(--muted);}
+  .result-count b{color:var(--red);font-weight:700;}
+  .toolbar-right{display:flex;align-items:center;gap:14px;}
+  .sort-select{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:9px 12px;font-size:13px;border-radius:2px;}
+  .view-toggle{display:flex;border:1px solid var(--border);border-radius:2px;overflow:hidden;}
+  .view-toggle button{background:var(--panel);border:none;color:var(--muted);padding:8px 10px;display:flex;}
+  .view-toggle button.active{background:var(--red);color:#fff;}
+
+  /* ===== GRID ===== */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .grid.list-view{grid-template-columns:1fr;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:6px;overflow:hidden;
+    display:flex;flex-direction:column;transition:.2s border-color, .2s box-shadow;
+    box-shadow:0 1px 2px rgba(0,0,0,.03);
+  }
+  .card:hover{border-color:#c7cad1;box-shadow:0 4px 14px rgba(0,0,0,.06);}
+  .grid.list-view .card{flex-direction:row;}
+  .card-media{position:relative;background:radial-gradient(circle at 50% 30%,#f5f6f8,#e8e9ec 75%);padding:22px 18px 10px;}
+  .grid.list-view .card-media{width:260px;flex:none;}
+  .badge-new{
+    position:absolute;top:12px;left:12px;background:var(--red);color:#fff;font-size:10px;
+    font-weight:800;letter-spacing:.5px;padding:4px 9px;border-radius:2px;
+  }
+  .fav-btn{
+    position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:50%;
+    background:#ffffffcc;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:#4b4f58;
+  }
+  .fav-btn.active{color:var(--red);border-color:var(--red);}
+  .fav-btn svg{width:16px;height:16px;}
+  .bike-svg{width:100%;height:120px;}
+  .card-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .card-title-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+  .card-title{font-size:15px;font-weight:800;letter-spacing:.2px;}
+  .card-year{font-size:12px;color:var(--muted);flex:none;}
+  .card-price{color:var(--red);font-size:19px;font-weight:800;}
+  .specs-row{display:flex;gap:14px;color:var(--muted);font-size:12px;flex-wrap:wrap;}
+  .specs-row span{display:flex;align-items:center;gap:5px;}
+  .specs-row svg{width:13px;height:13px;}
+  .view-details{
+    margin-top:6px;display:flex;align-items:center;justify-content:space-between;
+    border-top:1px solid var(--border);padding-top:12px;font-size:12.5px;font-weight:700;
+    letter-spacing:.3px;color:#374151;
+  }
+  .view-details svg{width:14px;height:14px;color:var(--red);}
+  .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);}
+  .empty-state b{display:block;color:var(--text);font-size:17px;margin-bottom:6px;}
+
+  /* ===== PAGINATION ===== */
+  .pagination-row{display:flex;align-items:center;justify-content:space-between;margin-top:30px;flex-wrap:wrap;gap:10px;}
+  .pagination{display:flex;gap:8px;}
+  .pagination button{
+    width:36px;height:36px;border-radius:2px;border:1px solid var(--border);background:var(--panel);
+    color:#4b4f58;font-size:13px;font-weight:600;
+  }
+  .pagination button.active{background:var(--red);border-color:var(--red);color:#fff;}
+  .pagination button:disabled{opacity:.4;}
+  .showing-total{font-size:13px;color:var(--muted);}
+
+  /* ===== CTA BANNER ===== */
+  .cta-banner{
+    max-width:1280px;margin:10px auto 0;padding:0 32px 32px;
+  }
+  .cta-inner{
+    background:linear-gradient(90deg,#fff5f5,#fef0f0);border:1px solid #fbdcdc;border-radius:8px;
+    padding:22px 26px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  .cta-left{display:flex;align-items:center;gap:16px;}
+  .cta-icon{width:44px;height:44px;border-radius:50%;background:var(--red-dim);display:flex;align-items:center;justify-content:center;flex:none;}
+  .cta-icon svg{width:22px;height:22px;color:var(--red);}
+  .cta-left b{font-size:15px;display:block;}
+  .cta-left span{font-size:13px;color:var(--muted);}
+  .cta-btn{
+    border:1px solid var(--red);color:var(--red);padding:12px 20px;border-radius:2px;font-size:13px;
+    font-weight:700;letter-spacing:.3px;display:flex;align-items:center;gap:6px;white-space:nowrap;
+    background:#fff;transition:background .2s, color .2s;
+  }
+  .cta-btn:hover{background:var(--red);color:#fff;}
+
+  /* ===== FOOTER ===== */
+  footer{border-top:1px solid var(--border);margin-top:20px;padding:50px 32px 24px;background:#fbfbfc;}
+  .footer-grid{max-width:1280px;margin:0 auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr 1fr;gap:30px;}
+  .footer-grid h4{font-size:12px;letter-spacing:1px;color:#374151;margin-bottom:16px;}
+  .footer-grid li{margin-bottom:10px;font-size:13.5px;color:var(--muted);}
+  .footer-grid p.tagline{color:var(--muted);font-size:13.5px;margin:10px 0 18px;max-width:230px;}
+  .footer-contact li{display:flex;gap:10px;align-items:flex-start;}
+  .footer-contact svg{width:15px;height:15px;color:var(--red);flex:none;margin-top:2px;}
+  .social-row{display:flex;gap:12px;margin-bottom:6px;}
+  .social-row a{width:34px;height:34px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#4b4f58;}
+  .social-row svg{width:15px;height:15px;}
+  .follow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;}
+  .follow-grid div{aspect-ratio:1;background:var(--panel-2);border-radius:3px;}
+  .footer-bottom{
+    max-width:1280px;margin:30px auto 0;padding-top:20px;border-top:1px solid var(--border);
+    display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);flex-wrap:wrap;gap:10px;
+  }
+  .footer-bottom a{margin-left:20px;}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:980px){
+    .content{grid-template-columns:1fr;}
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .hero h1{font-size:34px;}
+    .footer-grid{grid-template-columns:1fr 1fr;}
+    nav.main-nav{display:none;}
+  }
+  @media(max-width:600px){
+    .grid{grid-template-columns:1fr;}
+    .header-inner{padding:14px 18px;}
+    .content{padding:20px 18px;}
+    .footer-grid{grid-template-columns:1fr;}
+    .hero-art{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="header-inner">
+    <div class="logo">សេងតារា<span>ហាងលក់ម៉ូតូ</span></div>
+    <nav class="main-nav">
+      <a href="#" data-i18n="nav_home">HOME</a>
+      <a href="#" class="active"><span data-i18n="nav_moto">MOTORCYCLES</span> ▾</a>
+      <a href="#" data-i18n="nav_services">SERVICES</a>
+      <a href="#" data-i18n="nav_financing">FINANCING</a>
+      <a href="#" data-i18n="nav_about">ABOUT US</a>
+      <a href="#" data-i18n="nav_contact">CONTACT</a>
+    </nav>
+    <div class="header-right">
+      <div class="lang-toggle" id="langToggle">
+        <button data-lang="km">ខ្មែរ</button>
+        <button data-lang="en">EN</button>
+      </div>
+      <button class="icon-btn" aria-label="Search" onclick="document.getElementById('brandSearch').focus()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="Account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </button>
+      <button class="btn-outline" data-i18n="book_test_ride">BOOK A TEST RIDE</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero-section">
+  <div class="breadcrumb"><a href="#" data-i18n="crumb_home">Home</a><span class="sep">›</span><span class="current" data-i18n="crumb_moto">Motorcycles</span></div>
+  <div class="hero">
+    <div class="speed-lines" id="speedLines"></div>
+    <div class="hero-content">
+      <h1 data-i18n="hero_title">MOTORCYCLES</h1>
+      <p data-i18n="hero_subtitle">Find the perfect motorcycle that matches your style and needs.</p>
+    </div>
+    <div class="hero-art">
+      <svg viewBox="0 0 400 260" width="420" height="260">
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0263f"/><stop offset="1" stop-color="#3a0a10"/></linearGradient></defs>
+        <ellipse cx="220" cy="220" rx="150" ry="14" fill="#000" opacity=".4"/>
+        <circle cx="120" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
+        <circle cx="290" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
+        <path d="M120 190 L180 130 L250 130 L290 190" stroke="url(#g1)" stroke-width="10" fill="none" stroke-linecap="round"/>
+        <path d="M180 130 L165 90 L200 70" stroke="#666" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <circle cx="165" cy="90" r="16" fill="#111" stroke="#e0263f" stroke-width="3"/>
+        <rect x="190" y="115" width="70" height="18" rx="6" fill="#1a1a1a"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="wrap content">
+  <!-- SIDEBAR -->
+  <aside>
+    <button class="clear-filters" id="clearFiltersBtn">✕ <span data-i18n="clear_filters">CLEAR ALL FILTERS</span></button>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="cat_title">CATEGORY</div>
+      <label class="radio-row"><input type="radio" name="category" value="all" checked> <span data-i18n="cat_all">All Motorcycles</span></label>
+      <label class="radio-row"><input type="radio" name="category" value="new"> <span data-i18n="cat_new">New Motorcycles</span></label>
+      <label class="radio-row"><input type="radio" name="category" value="used"> <span data-i18n="cat_used">Used Motorcycles</span></label>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="brand_title">BRAND</div>
+      <div class="brand-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="brandSearch" data-i18n-placeholder="brand_search_ph" placeholder="Search brand">
+      </div>
+      <label class="radio-row"><input type="checkbox" id="allBrands" checked> <span data-i18n="brand_all">All Brands</span></label>
+      <div id="brandList"></div>
+      <div class="show-more" id="showMoreBrands" data-i18n="show_more">Show More +</div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="engine_title">ENGINE (CC)</div>
+      <label class="check-row"><input type="checkbox" name="engine" value="all" checked> <span data-i18n="engine_all">All Engine</span></label>
+      <label class="check-row"><input type="checkbox" name="engine" value="u150"> <span data-i18n="engine_u150">Under 150cc</span> <span class="count" id="c-u150"></span></label>
+      <label class="check-row"><input type="checkbox" name="engine" value="150-250"> <span data-i18n="engine_150_250">150cc - 250cc</span> <span class="count" id="c-150-250"></span></label>
+      <label class="check-row"><input type="checkbox" name="engine" value="251-500"> <span data-i18n="engine_251_500">251cc - 500cc</span> <span class="count" id="c-251-500"></span></label>
+      <label class="check-row"><input type="checkbox" name="engine" value="above500"> <span data-i18n="engine_above500">Above 500cc</span> <span class="count" id="c-above500"></span></label>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="price_title">PRICE RANGE</div>
+      <div class="price-slider">
+        <input type="range" min="800" max="7000" step="50" value="7000" id="priceRange">
+        <div class="price-labels"><span>$800</span><span>$7,000+</span></div>
+      </div>
+      <div class="price-chips">
+        <button data-min="0" data-max="1500" data-i18n="chip_under15">Under $1.5K</button>
+        <button data-min="1500" data-max="2500" data-i18n="chip_1525">$1.5K - $2.5K</button>
+        <button data-min="2500" data-max="4000" data-i18n="chip_2540">$2.5K - $4K</button>
+        <button data-min="4000" data-max="999999" data-i18n="chip_above4">Above $4K</button>
+      </div>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="year_title">YEAR</div>
+      <select class="filter-select" id="yearSelect">
+        <option value="all" data-i18n="year_all">All Years</option>
+        <option value="2024">2024</option>
+        <option value="2023">2023</option>
+        <option value="2022">2022</option>
+      </select>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title" data-i18n="trans_title">TRANSMISSION</div>
+      <label class="radio-row"><input type="radio" name="trans" value="all" checked> <span data-i18n="all_generic">All</span></label>
+      <label class="radio-row"><input type="radio" name="trans" value="Manual"> <span data-i18n="trans_manual">Manual</span></label>
+      <label class="radio-row"><input type="radio" name="trans" value="Automatic"> <span data-i18n="trans_automatic">Automatic</span></label>
+    </div>
+
+    <div class="filter-block" style="border-bottom:none;">
+      <div class="filter-title" data-i18n="fuel_title">FUEL TYPE</div>
+      <label class="radio-row"><input type="radio" name="fuel" value="all" checked> <span data-i18n="all_generic">All</span></label>
+      <label class="radio-row"><input type="radio" name="fuel" value="Petrol"> <span data-i18n="fuel_petrol">Petrol</span></label>
+      <label class="radio-row"><input type="radio" name="fuel" value="Electric"> <span data-i18n="fuel_electric">Electric</span></label>
+    </div>
+
+    <button class="apply-btn" id="applyBtn">APPLY FILTERS (48)</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="list-toolbar">
+      <div class="result-count" id="resultCount">Showing 1–12 of <b>48</b> motorcycles</div>
+      <div class="toolbar-right">
+        <select class="sort-select" id="sortSelect">
+          <option value="featured" data-i18n="sort_featured">Sort by: Featured</option>
+          <option value="price-asc" data-i18n="sort_price_asc">Price: Low to High</option>
+          <option value="price-desc" data-i18n="sort_price_desc">Price: High to Low</option>
+          <option value="year-desc" data-i18n="sort_newest">Newest First</option>
+          <option value="name-asc" data-i18n="sort_name">Name: A–Z</option>
+        </select>
+        <div class="view-toggle">
+          <button id="gridBtn" class="active" aria-label="Grid view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+          <button id="listBtn" aria-label="List view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="pagination-row">
+      <div class="pagination" id="pagination"></div>
+      <div class="showing-total" id="showingTotal">Showing 1–12 of 48</div>
+    </div>
+  </main>
+</div>
+
+<div class="cta-banner">
+  <div class="cta-inner">
+    <div class="cta-left">
+      <div class="cta-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div>
+        <b data-i18n="cta_title">NEED HELP CHOOSING THE RIGHT BIKE?</b>
+        <span data-i18n="cta_sub">Our experts are here to help you find the perfect match.</span>
+      </div>
+    </div>
+    <a href="#" class="cta-btn"><span data-i18n="cta_contact">CONTACT US</span> ›</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="logo" style="margin-bottom:8px;">សេងតារា<span>ហាងលក់ម៉ូតូ</span></div>
+      <p class="tagline" data-i18n="footer_tagline">Your trusted motorcycle partner. Quality bikes, expert service, and everything in between.</p>
+      <div class="social-row">
+        <a href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 22v-9h3l1-4h-4V7c0-1 .5-2 2-2h2V1h-3c-3 0-5 2-5 5v3H6v4h3v9z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 8s-.2-1.6-.8-2.3c-.8-.9-1.7-.9-2.1-1C16.1 4.5 12 4.5 12 4.5s-4.1 0-7.1.2c-.4 0-1.3.1-2.1 1C2.2 6.4 2 8 2 8S1.8 9.8 1.8 11.7v.6C1.8 14.2 2 16 2 16s.2 1.6.8 2.3c.8.9 1.9.9 2.4 1 1.7.2 7.3.3 7.3.3s4.1 0 7.1-.3c.4 0 1.3-.1 2.1-1 .6-.7.8-2.3.8-2.3s.2-1.8.2-3.7v-.6C22.3 9.8 22 8 22 8zM9.9 14.9V8.7l5.4 3.1z"/></svg></a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></a>
+      </div>
+    </div>
+    <div>
+      <h4 data-i18n="footer_quicklinks">QUICK LINKS</h4>
+      <ul>
+        <li data-i18n="nav_home">Home</li>
+        <li data-i18n="nav_moto">Motorcycles</li>
+        <li data-i18n="nav_services">Services</li>
+        <li data-i18n="nav_financing">Financing</li>
+        <li data-i18n="nav_about">About Us</li>
+        <li data-i18n="nav_contact">Contact</li>
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer_services">OUR SERVICES</h4>
+      <ul>
+        <li data-i18n="svc_servicing">Servicing</li>
+        <li data-i18n="svc_tires">Tires &amp; Wheels</li>
+        <li data-i18n="svc_parts">Spare Parts</li>
+        <li data-i18n="svc_accessories">Accessories</li>
+        <li data-i18n="svc_custom">Custom Build</li>
+        <li data-i18n="svc_testride">Test Ride</li>
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer_contact_heading">CONTACT US</h4>
+      <ul class="footer-contact">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> <span data-i18n="footer_address">#123, National Road 6A, Phnom Penh, Cambodia</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1 1 .3 2 .7 2.9a2 2 0 0 1-.4 2.1L8 10a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.4 1.9.6 2.9.7a2 2 0 0 1 1.7 2z"/></svg> +855 12 345 678</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg> info@sengtaramoto.com</li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> <span data-i18n="footer_hours">Mon–Sun: 8:00 AM – 6:00 PM</span></li>
+      </ul>
+    </div>
+    <div>
+      <h4 data-i18n="footer_followus">FOLLOW US</h4>
+      <div class="follow-grid">
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div data-i18n="footer_copyright">© 2025 Seng Tara Motorcycles. All Rights Reserved.</div>
+    <div><a href="#" data-i18n="footer_privacy">Privacy Policy</a><a href="#" data-i18n="footer_terms">Terms &amp; Conditions</a></div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
