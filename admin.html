@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ហាងលក់ម៉ូតូ សេងតារា — អ្នកគ្រប់គ្រង</title>
+<link rel="manifest" href="admin-manifest.json">
+<meta name="theme-color" content="#e0263f">
+<link rel="icon" href="icons/admin-icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-admin.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="សេងតារា Admin">
 <style>
   :root{
     --bg:#f3f4f6; --panel:#ffffff; --panel-2:#f5f6f8; --border:#e2e4e9;
@@ -780,6 +788,12 @@ function renderProfitSummary(){
 }
 
 checkSession();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
 </script>
 </body>
 </html>
