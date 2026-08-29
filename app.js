@@ -33,6 +33,8 @@ const I18N = {
     showing_text:(from,to,total)=>`Showing ${from}\u2013${to} of <b>${total}</b> motorcycles`,
     showing_total_text:(from,to,total)=>`Showing ${from}\u2013${to} of ${total}`,
     view_details:"VIEW DETAILS", badge_new:"NEW",
+    installment_from:"From", per_month:"/mo",
+    installment_disclaimer:"* Estimated monthly payment based on the financing term set for each motorcycle. Contact us for exact details.",
     empty_title:"No motorcycles match your filters", empty_sub:"Try adjusting or clearing your filters.",
     cta_title:"NEED HELP CHOOSING THE RIGHT BIKE?", cta_sub:"Our experts are here to help you find the perfect match.",
     cta_contact:"CONTACT US",
@@ -67,6 +69,8 @@ const I18N = {
     showing_text:(from,to,total)=>`បង្ហាញ ${from}\u2013${to} នៃ <b>${total}</b> ម៉ូតូ`,
     showing_total_text:(from,to,total)=>`បង្ហាញ ${from}\u2013${to} នៃ ${total}`,
     view_details:"មើលលម្អិត", badge_new:"ថ្មី",
+    installment_from:"ចាប់ពី", per_month:"/ខែ",
+    installment_disclaimer:"* ជាតម្លៃប៉ាន់ស្មានផ្អែកលើលក្ខខណ្ឌទូទាត់រំលស់សម្រាប់ម៉ូតូនីមួយៗ។ សូមទាក់ទងមកយើងសម្រាប់ព័ត៌មានលម្អិត។",
     empty_title:"គ្មានម៉ូតូត្រូវនឹងតម្រងរបស់អ្នកទេ", empty_sub:"សូមកែសម្រួល ឬសម្អាតតម្រងរបស់អ្នក។",
     cta_title:"ត្រូវការជំនួយក្នុងការជ្រើសរើសម៉ូតូឱ្យត្រូវ?", cta_sub:"អ្នកជំនាញរបស់យើងនៅទីនេះដើម្បីជួយអ្នករកម៉ូតូដ៏សមស្រប។",
     cta_contact:"ទាក់ទងមកយើង",
@@ -155,7 +159,9 @@ async function loadBikesFromSupabase(){
     abs:true,
     badge:d.badge||null,
     category:d.category||'new',
-    image_url:d.image_url||null
+    image_url:d.image_url||null,
+    downPayment:Number(d.installment_down_payment||0),
+    months:Number(d.installment_months||24)
   }));
 
   initSidebarData();
@@ -341,7 +347,8 @@ const specIcons = {
   gear:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   abs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>',
   heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
-  chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+  chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+  installment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>'
 };
 
 /* ============ RENDER ============ */
@@ -349,7 +356,8 @@ const grid = document.getElementById('grid');
 function renderCard(b){
   const color = BRAND_COLORS[b.brand] || '#e0263f';
   const favActive = state.favorites.has(b.id) ? 'active' : '';
-  const transLabel = b.transmission==='Automatic' ? t('trans_automatic') : t('trans_manual');
+  const months = b.months || 24;
+  const monthly = Math.ceil(Math.max(0, b.price - (b.downPayment||0)) / months);
   return `
   <div class="card" data-id="${b.id}">
     <div class="card-media">
@@ -363,11 +371,7 @@ function renderCard(b){
         <div class="card-year">${b.year}</div>
       </div>
       <div class="card-price">$${b.price.toLocaleString()}</div>
-      <div class="specs-row">
-        <span>${specIcons.cc} ${b.cc}cc</span>
-        <span>${specIcons.gear} ${transLabel}</span>
-        ${b.abs?`<span>${specIcons.abs} ABS</span>`:''}
-      </div>
+      <div class="installment-badge">${specIcons.installment}<span>${t('installment_from')} $${monthly}<small>${t('per_month')}</small></span></div>
       <div class="view-details">${t('view_details')} ${specIcons.chevron}</div>
     </div>
   </div>`;

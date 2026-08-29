@@ -208,6 +208,22 @@
             <div class="field"><label>តម្លៃលក់ ($)</label><input id="f_price" type="number" step="1" required placeholder="1850"></div>
             <div class="field"><label>ថ្ងៃលក់ចេញ</label><input id="f_solddate" type="date"></div>
             <div class="field"><label>តម្លៃលក់ពិត ($)</label><input id="f_saleprice" type="number" step="1" placeholder="1850"></div>
+
+            <div class="field"><label>ប្រាក់កក់ដំបូង ($)</label><input id="f_downpayment" type="number" step="1" placeholder="0"></div>
+            <div class="field">
+              <label>រយៈពេលទូទាត់រំលស់</label>
+              <select id="f_months">
+                <option value="6">៦ ខែ</option>
+                <option value="12">១២ ខែ</option>
+                <option value="18">១៨ ខែ</option>
+                <option value="24" selected>២៤ ខែ</option>
+                <option value="36">៣៦ ខែ</option>
+              </select>
+            </div>
+            <div class="field span2">
+              <label>តម្លៃប្រចាំខែ (បង្ហាញលើគេហទំព័រ)</label>
+              <input id="f_monthlyPreview" disabled placeholder="—">
+            </div>
           </div>
           <div style="margin-top:16px;display:flex;gap:10px;">
             <button type="submit" class="btn" id="submitBtn">បន្ថែមម៉ូតូ</button>
@@ -508,6 +524,9 @@ function openViewModal(id){
   viewModalCurrentId = v.id;
   const totalCost = Number(v.purchase_cost||0)+Number(v.repair_cost||0);
   const profit = v.status==='Sold' ? (Number(v.actual_sale_price||0)-totalCost) : null;
+  const months = v.installment_months||24;
+  const down = Number(v.installment_down_payment||0);
+  const monthly = Math.ceil(Math.max(0, Number(v.price||0)-down)/months);
 
   document.getElementById('viewModalTitle').textContent = v.name;
   document.getElementById('viewModalBody').innerHTML = `
@@ -531,6 +550,9 @@ function openViewModal(id){
       ${detailItem('ថ្លៃជួសជុល', money(v.repair_cost))}
       ${detailItem('ថ្លៃដើមសរុប', money(totalCost))}
       ${detailItem('តម្លៃលក់', money(v.price))}
+      ${detailItem('ប្រាក់កក់ដំបូង', money(down))}
+      ${detailItem('រយៈពេលទូទាត់រំលស់', months+' ខែ')}
+      ${detailItem('តម្លៃប្រចាំខែ (លើគេហទំព័រ)', money(monthly)+' /ខែ')}
       ${detailItem('ថ្ងៃលក់ចេញ', v.date_sold_out)}
       ${detailItem('តម្លៃលក់ពិត', v.actual_sale_price!=null?money(v.actual_sale_price):null)}
       ${detailItem('ប្រាក់ចំណេញ', profit!==null?money(profit):null)}
@@ -578,6 +600,9 @@ function loadIntoForm(id){
   document.getElementById('f_price').value = v.price||'';
   document.getElementById('f_solddate').value = v.date_sold_out||'';
   document.getElementById('f_saleprice').value = v.actual_sale_price||'';
+  document.getElementById('f_downpayment').value = v.installment_down_payment||0;
+  document.getElementById('f_months').value = v.installment_months||24;
+  updateMonthlyPreview();
   document.getElementById('formTitle').textContent = 'កែសម្រួលម៉ូតូ';
   document.getElementById('submitBtn').textContent = 'រក្សាទុកការផ្លាស់ប្តូរ';
   document.getElementById('cancelEditBtn').classList.remove('hidden');
@@ -593,7 +618,21 @@ function resetBikeForm(){
   document.getElementById('submitBtn').textContent = 'បន្ថែមម៉ូតូ';
   document.getElementById('cancelEditBtn').classList.add('hidden');
   document.getElementById('formStatus').textContent='';
+  updateMonthlyPreview();
 }
+
+function updateMonthlyPreview(){
+  const price = parseFloat(document.getElementById('f_price').value) || 0;
+  const down = parseFloat(document.getElementById('f_downpayment').value) || 0;
+  const months = parseInt(document.getElementById('f_months').value, 10) || 24;
+  const remaining = Math.max(0, price - down);
+  const monthly = months > 0 ? Math.ceil(remaining / months) : 0;
+  document.getElementById('f_monthlyPreview').value = price ? `$${monthly} / ខែ (លើគេហទំព័រ)` : '—';
+}
+['f_price','f_downpayment','f_months'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', updateMonthlyPreview);
+  document.getElementById(id).addEventListener('change', updateMonthlyPreview);
+});
 
 document.getElementById('bikeForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -622,7 +661,9 @@ document.getElementById('bikeForm').addEventListener('submit', async (e)=>{
     previous_owner: document.getElementById('f_prevowner').value.trim() || null,
     price: parseFloat(document.getElementById('f_price').value),
     date_sold_out: document.getElementById('f_solddate').value || null,
-    actual_sale_price: document.getElementById('f_saleprice').value ? parseFloat(document.getElementById('f_saleprice').value) : null
+    actual_sale_price: document.getElementById('f_saleprice').value ? parseFloat(document.getElementById('f_saleprice').value) : null,
+    installment_down_payment: parseFloat(document.getElementById('f_downpayment').value) || 0,
+    installment_months: parseInt(document.getElementById('f_months').value, 10) || 24
   };
 
   const file = document.getElementById('f_image').files[0];
