@@ -33,6 +33,8 @@ const I18N = {
     showing_text:(from,to,total)=>`Showing ${from}\u2013${to} of <b>${total}</b> motorcycles`,
     showing_total_text:(from,to,total)=>`Showing ${from}\u2013${to} of ${total}`,
     view_details:"VIEW DETAILS", badge_new:"NEW",
+    inquire_btn:"MESSAGE US ABOUT THIS BIKE",
+    messenger_message:(name,price)=>`Hi! I'm interested in the ${name} ($${price}). Is it still available?`,
     installment_from:"From", per_month:"/mo",
     installment_disclaimer:"* Estimated monthly payment based on the financing term set for each motorcycle. Contact us for exact details.",
     empty_title:"No motorcycles match your filters", empty_sub:"Try adjusting or clearing your filters.",
@@ -51,7 +53,7 @@ const I18N = {
   },
   km: {
     call_us:"ទូរស័ព្ទមកយើង",
-    hero_title:"ម៉ូតូគុណភាព តម្លៃសមរម្យ", hero_subtitle:"រកមើលម៉ូតូ Honda ថ្មី និងមួយដៃរបស់យើងទាំងអស់នៅទីនេះ។",
+    hero_title:"ម៉ូតូគុណភាព តម្លៃសមរម្យ", hero_subtitle:"រកមើលម៉ូតូ Honda ថ្មី និងមួយទឹករបស់យើងទាំងអស់នៅទីនេះ",
     clear_filters:"សម្អាតតម្រងទាំងអស់", cat_title:"ប្រភេទ", cat_all:"ម៉ូតូទាំងអស់",
     cat_new:"ម៉ូតូថ្មី", cat_used:"ម៉ូតូបានប្រើប្រាស់",
     brand_title:"ម៉ាក", brand_search_ph:"ស្វែងរកម៉ាក", brand_all:"ម៉ាកទាំងអស់",
@@ -69,6 +71,8 @@ const I18N = {
     showing_text:(from,to,total)=>`បង្ហាញ ${from}\u2013${to} នៃ <b>${total}</b> ម៉ូតូ`,
     showing_total_text:(from,to,total)=>`បង្ហាញ ${from}\u2013${to} នៃ ${total}`,
     view_details:"មើលលម្អិត", badge_new:"ថ្មី",
+    inquire_btn:"សរសេរសួរអំពីម៉ូតូនេះ",
+    messenger_message:(name,price)=>`សួស្តី! ខ្ញុំចាប់អារម្មណ៍លើ ${name} (${price}$)។ តើនៅមានលក់ទេ?`,
     installment_from:"ចាប់ពី", per_month:"/ខែ",
     installment_disclaimer:"* ជាតម្លៃប៉ាន់ស្មានផ្អែកលើលក្ខខណ្ឌទូទាត់រំលស់សម្រាប់ម៉ូតូនីមួយៗ។ សូមទាក់ទងមកយើងសម្រាប់ព័ត៌មានលម្អិត។",
     empty_title:"គ្មានម៉ូតូត្រូវនឹងតម្រងរបស់អ្នកទេ", empty_sub:"សូមកែសម្រួល ឬសម្អាតតម្រងរបស់អ្នក។",
@@ -118,6 +122,9 @@ document.getElementById('langToggle').addEventListener('click', e=>{
 applyStaticTranslations();
 
 /* ============ DATA ============ */
+/* ============ CONTACT ============ */
+const FB_PAGE_ID = '100082563013885';
+
 const BRAND_COLORS = {
   Yamaha:'#2563eb', Honda:'#e11d2a', Kawasaki:'#7dd321', 'Royal Enfield':'#8a6a4b',
   Suzuki:'#f2c200', KTM:'#ff6a00', Vespa:'#6b7280'
@@ -348,7 +355,8 @@ const specIcons = {
   abs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>',
   heart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
   chevron:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
-  installment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>'
+  installment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></svg>',
+  messenger:'<svg class="fb-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.5 2 2 6.1 2 11.2c0 2.9 1.4 5.5 3.7 7.2V22l3.4-1.9c.9.25 1.9.4 2.9.4 5.5 0 10-4.1 10-9.3S17.5 2 12 2zm1 12.5-2.6-2.8-5 2.8 5.5-5.9 2.7 2.8 4.9-2.8-5.5 5.9z"/></svg>'
 };
 
 /* ============ RENDER ============ */
@@ -358,6 +366,8 @@ function renderCard(b){
   const favActive = state.favorites.has(b.id) ? 'active' : '';
   const months = b.months || 24;
   const monthly = Math.ceil(Math.max(0, b.price - (b.downPayment||0)) / months);
+  const msgText = t('messenger_message')(b.name, b.price.toLocaleString());
+  const messengerUrl = `https://m.me/${FB_PAGE_ID}?text=${encodeURIComponent(msgText)}`;
   return `
   <div class="card" data-id="${b.id}">
     <div class="card-media">
@@ -372,7 +382,10 @@ function renderCard(b){
       </div>
       <div class="card-price">$${b.price.toLocaleString()}</div>
       <div class="installment-badge">${specIcons.installment}<span>${t('installment_from')} $${monthly}<small>${t('per_month')}</small></span></div>
-      <div class="view-details">${t('view_details')} ${specIcons.chevron}</div>
+      <a href="${messengerUrl}" target="_blank" rel="noopener" class="view-details">
+        <span class="vd-label">${specIcons.messenger} ${t('inquire_btn')}</span>
+        <svg class="chev-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </a>
     </div>
   </div>`;
 }
