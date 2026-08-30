@@ -113,6 +113,7 @@ function setLanguage(lang){
   applyStaticTranslations();
   renderBrandCheckboxes(document.getElementById('brandSearch').value, brandsExpanded);
   document.getElementById('showMoreBrands').textContent = brandsExpanded ? t('show_less') : t('show_more');
+  updateHeroLanguage();
   render();
 }
 document.getElementById('langToggle').addEventListener('click', e=>{
@@ -445,6 +446,116 @@ grid.addEventListener('click', e=>{
 });
 
 function applyAndRender(){ state.page=1; render(); }
+
+/* ============ HERO CAROUSEL (Promotions) ============ */
+let heroSlidesData = [];
+let heroCurrentIndex = 0;
+let heroTimer = null;
+
+async function loadPromotions(){
+  if(!supabaseClient) return;
+  const { data, error } = await supabaseClient
+    .from('promotions')
+    .select('*')
+    .eq('active', true)
+    .order('display_order', { ascending:true });
+  if(error){ console.error(error); return; }
+  if(!data || !data.length) return; // keep the built-in fallback slide
+  heroSlidesData = data;
+  renderHeroSlides();
+  startHeroAutoRotate();
+}
+
+function slideText(p){
+  const title = currentLang==='km' ? (p.title_km||p.title_en||'') : (p.title_en||p.title_km||'');
+  const subtitle = currentLang==='km' ? (p.subtitle_km||p.subtitle_en||'') : (p.subtitle_en||p.subtitle_km||'');
+  return { title, subtitle };
+}
+
+function renderHeroSlides(){
+  const container = document.getElementById('heroSlides');
+  if(!heroSlidesData.length) return;
+  container.innerHTML = heroSlidesData.map((p, i)=>{
+    const { title, subtitle } = slideText(p);
+    const bg = p.image_url ? `<div class="hero-slide-bg" style="background-image:url('${p.image_url}')"></div>` : '';
+    return `
+    <div class="hero-slide ${i===0?'active':''}" data-slide="${i}">
+      ${bg}
+      <div class="hero-content">
+        <h1>${title}</h1>
+        ${subtitle?`<p>${subtitle}</p>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  heroCurrentIndex = 0;
+  renderHeroDots();
+}
+
+function updateHeroLanguage(){
+  if(!heroSlidesData.length) return;
+  document.querySelectorAll('.hero-slide').forEach((el, i)=>{
+    const p = heroSlidesData[i];
+    if(!p) return;
+    const { title, subtitle } = slideText(p);
+    const h1 = el.querySelector('h1');
+    if(h1) h1.textContent = title;
+    let pEl = el.querySelector('.hero-content p');
+    if(subtitle){
+      if(!pEl){ pEl = document.createElement('p'); el.querySelector('.hero-content').appendChild(pEl); }
+      pEl.textContent = subtitle;
+    } else if(pEl){
+      pEl.remove();
+    }
+  });
+}
+
+function renderHeroDots(){
+  const dotsEl = document.getElementById('heroDots');
+  if(heroSlidesData.length <= 1){ dotsEl.innerHTML=''; return; }
+  dotsEl.innerHTML = heroSlidesData.map((_,i)=>
+    `<button data-dot="${i}" class="${i===heroCurrentIndex?'active':''}" aria-label="Slide ${i+1}"></button>`
+  ).join('');
+}
+
+function goToHeroSlide(i){
+  if(!heroSlidesData.length) return;
+  const slides = document.querySelectorAll('.hero-slide');
+  if(!slides.length) return;
+  heroCurrentIndex = (i + heroSlidesData.length) % heroSlidesData.length;
+  slides.forEach((el,idx)=> el.classList.toggle('active', idx===heroCurrentIndex));
+  document.querySelectorAll('#heroDots button').forEach((el,idx)=> el.classList.toggle('active', idx===heroCurrentIndex));
+}
+function nextHeroSlide(){ goToHeroSlide(heroCurrentIndex+1); }
+function prevHeroSlide(){ goToHeroSlide(heroCurrentIndex-1); }
+
+function startHeroAutoRotate(){
+  stopHeroAutoRotate();
+  if(heroSlidesData.length <= 1) return;
+  heroTimer = setInterval(nextHeroSlide, 6000);
+}
+function stopHeroAutoRotate(){ if(heroTimer) clearInterval(heroTimer); heroTimer=null; }
+
+document.getElementById('heroPrev').addEventListener('click', ()=>{ prevHeroSlide(); startHeroAutoRotate(); });
+document.getElementById('heroNext').addEventListener('click', ()=>{ nextHeroSlide(); startHeroAutoRotate(); });
+document.getElementById('heroDots').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button[data-dot]');
+  if(btn){ goToHeroSlide(parseInt(btn.dataset.dot,10)); startHeroAutoRotate(); }
+});
+
+const heroCarouselEl = document.getElementById('heroCarousel');
+heroCarouselEl.addEventListener('mouseenter', stopHeroAutoRotate);
+heroCarouselEl.addEventListener('mouseleave', startHeroAutoRotate);
+
+let heroTouchStartX = null;
+heroCarouselEl.addEventListener('touchstart', e=>{ heroTouchStartX = e.touches[0].clientX; }, {passive:true});
+heroCarouselEl.addEventListener('touchend', e=>{
+  if(heroTouchStartX===null) return;
+  const dx = e.changedTouches[0].clientX - heroTouchStartX;
+  if(Math.abs(dx) > 40){ dx>0 ? prevHeroSlide() : nextHeroSlide(); startHeroAutoRotate(); }
+  heroTouchStartX = null;
+});
+
+loadPromotions();
 
 /* initial load — pulls live inventory from Supabase */
 loadBikesFromSupabase();

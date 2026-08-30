@@ -72,7 +72,7 @@
   /* ===== HERO ===== */
   .hero-section{position:relative;overflow:hidden;border-bottom:1px solid var(--border);}
   .hero{
-    position:relative;min-height:280px;display:flex;align-items:center;
+    position:relative;min-height:340px;display:flex;align-items:center;
     background:
       radial-gradient(ellipse at 75% 40%, rgba(224,38,63,.08), transparent 55%),
       linear-gradient(100deg,#ffffff 30%, #fbf7f7 60%, #fdf2f2 100%);
@@ -86,7 +86,7 @@
     display:flex;align-items:center;justify-content:center;opacity:.9;
     z-index:1;
   }
-  .speed-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+  .speed-lines{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0;}
   .speed-lines i{
     position:absolute;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red));
     animation:zoom 2.4s linear infinite;
@@ -96,6 +96,41 @@
     10%{opacity:1;}
     to{transform:translateX(-900px);opacity:0;}
   }
+
+  /* ===== HERO CAROUSEL ===== */
+  .hero-slides{position:relative;width:100%;min-height:340px;}
+  .hero-slide{
+    position:absolute;inset:0;display:flex;align-items:center;
+    opacity:0;visibility:hidden;transition:opacity .6s ease;z-index:1;
+  }
+  .hero-slide.active{opacity:1;visibility:visible;z-index:2;}
+  .hero-slide-bg{
+    position:absolute;inset:0;background-size:cover;background-position:center;
+    z-index:0;
+  }
+  .hero-slide-bg::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(90deg, rgba(255,255,255,.94) 0%, rgba(255,255,255,.75) 40%, rgba(255,255,255,.25) 75%, rgba(255,255,255,0) 100%);
+  }
+  .hero-nav{
+    position:absolute;top:50%;transform:translateY(-50%);z-index:5;
+    width:40px;height:40px;border-radius:50%;background:#ffffffd9;border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;color:#374151;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);transition:background .15s;
+  }
+  .hero-nav:hover{background:#fff;color:var(--red);}
+  .hero-nav svg{width:18px;height:18px;}
+  .hero-nav.prev{left:20px;}
+  .hero-nav.next{right:20px;}
+  .hero-dots{
+    position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;z-index:5;
+  }
+  .hero-dots button{
+    width:8px;height:8px;border-radius:50%;background:#d1d5db;border:none;padding:0;
+    transition:background .2s, width .2s;
+  }
+  .hero-dots button.active{background:var(--red);width:22px;border-radius:4px;}
 
   /* ===== LAYOUT ===== */
   .content{max-width:1280px;margin:0 auto;padding:32px;display:grid;grid-template-columns:280px 1fr;gap:28px;align-items:start;}
@@ -271,6 +306,10 @@
     .content{padding:20px 18px;}
     .footer-grid{grid-template-columns:1fr;}
     .hero-art{display:none;}
+    .hero-nav{width:32px;height:32px;}
+    .hero-nav.prev{left:8px;}
+    .hero-nav.next{right:8px;}
+    .hero-slide-bg::after{background:linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.9) 70%, rgba(255,255,255,.97) 100%);}
   }
 </style>
 </head>
@@ -296,24 +335,35 @@
 </header>
 
 <section class="hero-section">
-  <div class="hero">
+  <div class="hero" id="heroCarousel">
     <div class="speed-lines" id="speedLines"></div>
-    <div class="hero-content">
-      <h1 data-i18n="hero_title">MOTORCYCLES</h1>
-      <p data-i18n="hero_subtitle">Find the perfect motorcycle that matches your style and needs.</p>
+    <div class="hero-slides" id="heroSlides">
+      <div class="hero-slide active" data-slide="0">
+        <div class="hero-content">
+          <h1 data-i18n="hero_title">MOTORCYCLES</h1>
+          <p data-i18n="hero_subtitle">Find the perfect motorcycle that matches your style and needs.</p>
+        </div>
+        <div class="hero-art">
+          <svg viewBox="0 0 400 260" width="420" height="260">
+            <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0263f"/><stop offset="1" stop-color="#3a0a10"/></linearGradient></defs>
+            <ellipse cx="220" cy="220" rx="150" ry="14" fill="#000" opacity=".4"/>
+            <circle cx="120" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
+            <circle cx="290" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
+            <path d="M120 190 L180 130 L250 130 L290 190" stroke="url(#g1)" stroke-width="10" fill="none" stroke-linecap="round"/>
+            <path d="M180 130 L165 90 L200 70" stroke="#666" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <circle cx="165" cy="90" r="16" fill="#111" stroke="#e0263f" stroke-width="3"/>
+            <rect x="190" y="115" width="70" height="18" rx="6" fill="#1a1a1a"/>
+          </svg>
+        </div>
+      </div>
     </div>
-    <div class="hero-art">
-      <svg viewBox="0 0 400 260" width="420" height="260">
-        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0263f"/><stop offset="1" stop-color="#3a0a10"/></linearGradient></defs>
-        <ellipse cx="220" cy="220" rx="150" ry="14" fill="#000" opacity=".4"/>
-        <circle cx="120" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
-        <circle cx="290" cy="190" r="42" fill="none" stroke="#333" stroke-width="10"/>
-        <path d="M120 190 L180 130 L250 130 L290 190" stroke="url(#g1)" stroke-width="10" fill="none" stroke-linecap="round"/>
-        <path d="M180 130 L165 90 L200 70" stroke="#666" stroke-width="8" fill="none" stroke-linecap="round"/>
-        <circle cx="165" cy="90" r="16" fill="#111" stroke="#e0263f" stroke-width="3"/>
-        <rect x="190" y="115" width="70" height="18" rx="6" fill="#1a1a1a"/>
-      </svg>
-    </div>
+    <button class="hero-nav prev" id="heroPrev" aria-label="Previous slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <button class="hero-nav next" id="heroNext" aria-label="Next slide">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <div class="hero-dots" id="heroDots"></div>
   </div>
 </section>
 

@@ -132,6 +132,7 @@
   <div class="tabs">
     <button class="tab-btn active" data-tab="tab-dashboard">ផ្ទាំងគ្រប់គ្រង</button>
     <button class="tab-btn" data-tab="tab-register">បញ្ជីម៉ូតូ</button>
+    <button class="tab-btn" data-tab="tab-promotions">ការផ្សព្វផ្សាយ</button>
     <button class="tab-btn" data-tab="tab-expenses">ចំណាយប្រចាំខែ</button>
     <button class="tab-btn" data-tab="tab-profit">របាយការណ៍ចំណេញ</button>
   </div>
@@ -262,6 +263,43 @@
       </div>
     </div>
 
+    <!-- ===== TAB: PROMOTIONS (hero slideshow) ===== -->
+    <div id="tab-promotions" class="tab-panel hidden">
+      <div class="card">
+        <h2 id="promoFormTitle">បន្ថែមស្លាយថ្មី</h2>
+        <form id="promoForm">
+          <input type="hidden" id="p_editId">
+          <div class="form-grid">
+            <div class="field span2"><label>ចំណងជើង (ខ្មែរ)</label><input id="p_title_km" required placeholder="ម៉ូតូគុណភាព តម្លៃសមរម្យ"></div>
+            <div class="field span2"><label>Title (English)</label><input id="p_title_en" required placeholder="Quality Motorcycles, Honest Prices"></div>
+            <div class="field span2"><label>អត្ថបទរង (ខ្មែរ)</label><input id="p_subtitle_km" placeholder="រកមើលម៉ូតូ Honda ថ្មី..."></div>
+            <div class="field span2"><label>Subtitle (English)</label><input id="p_subtitle_en" placeholder="Browse our Honda motorcycles..."></div>
+            <div class="field"><label>លំដាប់បង្ហាញ</label><input id="p_order" type="number" step="1" placeholder="1"></div>
+            <div class="field">
+              <label>ស្ថានភាព</label>
+              <select id="p_active"><option value="true">សកម្ម (បង្ហាញ)</option><option value="false">លាក់</option></select>
+            </div>
+            <div class="field full"><label>រូបភាពផ្ទាំង (ស្រេចចិត្ត)</label><input id="p_image" type="file" accept="image/*"></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px;">
+            <button type="submit" class="btn" id="promoSubmitBtn">បន្ថែមស្លាយ</button>
+            <button type="button" class="btn-outline hidden" id="promoCancelBtn">បោះបង់ការកែសម្រួល</button>
+          </div>
+          <div class="status-msg" id="promoFormStatus"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <h2>ស្លាយទាំងអស់</h2>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>រូបភាព</th><th>ចំណងជើង</th><th>លំដាប់</th><th>ស្ថានភាព</th><th>សកម្មភាព</th></tr></thead>
+            <tbody id="promoTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ===== TAB: MONTHLY EXPENSES ===== -->
     <div id="tab-expenses" class="tab-panel hidden">
       <div class="card">
@@ -340,6 +378,7 @@ const loginError = document.getElementById('loginError');
 
 let allVehicles = [];
 let allExpenses = [];
+let allPromotions = [];
 
 /* ---- AUTH ---- */
 async function checkSession(){
@@ -391,18 +430,22 @@ function daysBetween(a,b){
 
 /* ---- LOAD ALL DATA ---- */
 async function loadAll(){
-  const [{data:vehicles, error:vErr}, {data:expenses, error:eErr}] = await Promise.all([
+  const [{data:vehicles, error:vErr}, {data:expenses, error:eErr}, {data:promos, error:pErr}] = await Promise.all([
     sb.from('motorcycles').select('*').order('id',{ascending:false}),
-    sb.from('monthly_expenses').select('*').order('month',{ascending:false})
+    sb.from('monthly_expenses').select('*').order('month',{ascending:false}),
+    sb.from('promotions').select('*').order('display_order',{ascending:true})
   ]);
   if(vErr) console.error(vErr);
   if(eErr) console.error(eErr);
+  if(pErr) console.error(pErr);
   allVehicles = vehicles || [];
   allExpenses = expenses || [];
+  allPromotions = promos || [];
   renderDashboard();
   renderRegisterTable();
   renderExpensesTable();
   renderProfitSummary();
+  renderPromotionsTable();
 }
 
 /* ================= DASHBOARD ================= */
@@ -827,6 +870,98 @@ function renderProfitSummary(){
 
   document.getElementById('profitTableBody').innerHTML = rows + totalRow;
 }
+
+/* ================= PROMOTIONS (hero slideshow) ================= */
+function renderPromotionsTable(){
+  const sorted = [...allPromotions].sort((a,b)=>(a.display_order||0)-(b.display_order||0));
+  document.getElementById('promoTableBody').innerHTML = sorted.length ? sorted.map(p=>`
+    <tr data-id="${p.id}">
+      <td>${p.image_url?`<img class="thumb" src="${p.image_url}">`:'—'}</td>
+      <td>${p.title_km||p.title_en||'—'}</td>
+      <td>${p.display_order??0}</td>
+      <td>${p.active ? '<span class="pill pill-green">សកម្ម</span>' : '<span class="pill pill-gray">លាក់</span>'}</td>
+      <td class="actions">
+        <button class="btn-edit btn-small" data-promoedit="${p.id}">កែសម្រួល</button>
+        <button class="btn-danger btn-small" data-promodel="${p.id}">លុប</button>
+      </td>
+    </tr>
+  `).join('') : `<tr><td colspan="5">មិនទាន់មានស្លាយទេ។</td></tr>`;
+}
+
+document.getElementById('promoTableBody').addEventListener('click', async (e)=>{
+  const editId = e.target.dataset.promoedit;
+  const delId = e.target.dataset.promodel;
+  if(editId) loadPromoIntoForm(editId);
+  if(delId){
+    if(!confirm('លុបស្លាយនេះឬ?')) return;
+    const { error } = await sb.from('promotions').delete().eq('id', delId);
+    if(error){ alert('ការលុបបរាជ័យ៖ '+error.message); return; }
+    await loadAll();
+  }
+});
+
+function loadPromoIntoForm(id){
+  const p = allPromotions.find(x=>String(x.id)===String(id));
+  if(!p) return;
+  document.getElementById('p_editId').value = p.id;
+  document.getElementById('p_title_km').value = p.title_km||'';
+  document.getElementById('p_title_en').value = p.title_en||'';
+  document.getElementById('p_subtitle_km').value = p.subtitle_km||'';
+  document.getElementById('p_subtitle_en').value = p.subtitle_en||'';
+  document.getElementById('p_order').value = p.display_order||0;
+  document.getElementById('p_active').value = p.active ? 'true' : 'false';
+  document.getElementById('promoFormTitle').textContent = 'កែសម្រួលស្លាយ';
+  document.getElementById('promoSubmitBtn').textContent = 'រក្សាទុកការផ្លាស់ប្តូរ';
+  document.getElementById('promoCancelBtn').classList.remove('hidden');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.getElementById('promoCancelBtn').addEventListener('click', resetPromoForm);
+function resetPromoForm(){
+  document.getElementById('promoForm').reset();
+  document.getElementById('p_editId').value='';
+  document.getElementById('promoFormTitle').textContent = 'បន្ថែមស្លាយថ្មី';
+  document.getElementById('promoSubmitBtn').textContent = 'បន្ថែមស្លាយ';
+  document.getElementById('promoCancelBtn').classList.add('hidden');
+  document.getElementById('promoFormStatus').textContent='';
+}
+
+document.getElementById('promoForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const statusEl = document.getElementById('promoFormStatus');
+  statusEl.className='status-msg'; statusEl.textContent='កំពុងរក្សាទុក...';
+
+  const id = document.getElementById('p_editId').value;
+  const payload = {
+    title_km: document.getElementById('p_title_km').value.trim(),
+    title_en: document.getElementById('p_title_en').value.trim(),
+    subtitle_km: document.getElementById('p_subtitle_km').value.trim() || null,
+    subtitle_en: document.getElementById('p_subtitle_en').value.trim() || null,
+    display_order: parseInt(document.getElementById('p_order').value, 10) || 0,
+    active: document.getElementById('p_active').value === 'true'
+  };
+
+  const file = document.getElementById('p_image').files[0];
+  if(file){
+    const filePath = `promo-${Date.now()}-${file.name.replace(/\s+/g,'-')}`;
+    const { error: uploadError } = await sb.storage.from('motorcycle-images').upload(filePath, file);
+    if(uploadError){ statusEl.className='status-msg err'; statusEl.textContent = 'ការផ្ទុករូបភាពបរាជ័យ៖ '+uploadError.message; return; }
+    const { data: pub } = sb.storage.from('motorcycle-images').getPublicUrl(filePath);
+    payload.image_url = pub.publicUrl;
+  }
+
+  let error;
+  if(id){
+    ({ error } = await sb.from('promotions').update(payload).eq('id', id));
+  } else {
+    ({ error } = await sb.from('promotions').insert(payload));
+  }
+
+  if(error){ statusEl.className='status-msg err'; statusEl.textContent = 'ការរក្សាទុកបរាជ័យ៖ '+error.message; return; }
+  statusEl.className='status-msg ok'; statusEl.textContent = id ? 'ធ្វើបច្ចុប្បន្នភាពជោគជ័យ។' : 'បន្ថែមជោគជ័យ។';
+  resetPromoForm();
+  await loadAll();
+});
 
 checkSession();
 
